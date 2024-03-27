@@ -208,13 +208,14 @@ def load_model(args) -> tuple:
 
     load_8bit = args.load_8bit
     if args.model == 'LLaMA-7B':
-        tokenizer = LlamaTokenizer.from_pretrained(base_model)
+        tokenizer = LlamaTokenizer.from_pretrained(base_model,cache_dir='/home/comp/18482201/llm_research/zjlei/llama')
     else:
         tokenizer = AutoTokenizer.from_pretrained(base_model)
     if device == "cuda":
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
-            load_in_8bit=load_8bit,
+            cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
+            load_in_4bit=load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True,
@@ -239,7 +240,7 @@ def load_model(args) -> tuple:
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(
-            base_model, device_map={"": device}, low_cpu_mem_usage=True
+            base_model, cache_dir='/home/comp/18482201/llm_research/zjlei/llama',device_map={"": device}, low_cpu_mem_usage=True
         )
         model = PeftModel.from_pretrained(
             model,
@@ -256,8 +257,8 @@ def load_model(args) -> tuple:
             model.half()  # seems to fix bugs for some users.
 
         model.eval()
-        if torch.__version__ >= "2" and sys.platform != "win32":
-            model = torch.compile(model)
+        # if torch.__version__ >= "2" and sys.platform != "win32":
+        #     model = torch.compile(model)
 
     return tokenizer, model
 

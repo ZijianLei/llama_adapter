@@ -30,11 +30,12 @@ def main(
         base_model
     ), "Please specify a --base_model, e.g. --base_model='decapoda-research/llama-7b-hf'"
 
-    tokenizer = LlamaTokenizer.from_pretrained(base_model)
+    tokenizer = LlamaTokenizer.from_pretrained(base_model,cache_dir='/home/comp/18482201/llm_research/zjlei/llama')
     if device == "cuda":
         model = LlamaForCausalLM.from_pretrained(
             base_model,
-            load_in_8bit=load_8bit,
+            cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
+            load_in_4bit=load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True,
@@ -47,6 +48,7 @@ def main(
     elif device == "mps":
         model = LlamaForCausalLM.from_pretrained(
             base_model,
+            cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
             device_map={"": device},
             torch_dtype=torch.float16,
         )
@@ -58,7 +60,7 @@ def main(
         )
     else:
         model = LlamaForCausalLM.from_pretrained(
-            base_model, device_map={"": device}, low_cpu_mem_usage=True
+            base_model, cache_dir='/home/comp/18482201/llm_research/zjlei/llama',device_map={"": device}, low_cpu_mem_usage=True
         )
         model = PeftModel.from_pretrained(
             model,

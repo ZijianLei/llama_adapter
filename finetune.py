@@ -16,14 +16,14 @@ import bitsandbytes as bnb
 sys.path.append(os.path.join(os.getcwd(), "peft/src/"))
 from peft import (  # noqa: E402
     LoraConfig,
-    BottleneckConfig,
-    PrefixTuningConfig,
+    # BottleneckConfig,
+    # PrefixTuningConfig,
     get_peft_model,
     get_peft_model_state_dict,
     prepare_model_for_int8_training,
     set_peft_model_state_dict,
 )
-from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer, AutoModel  # noqa: F402
+from transformers import AutoModelForCausalLM, AutoTokenizer, LlamaTokenizer, AutoModel,LlamaForCausalLM  # noqa: F402
 
 
 def train(
@@ -125,9 +125,10 @@ def train(
         os.environ["WANDB_LOG_MODEL"] = wandb_log_model
 
     if load_8bit:
-        model = AutoModelForCausalLM.from_pretrained(
+        model = LlamaForCausalLM.from_pretrained(
             base_model,
-            load_in_8bit=load_8bit,
+            cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
+            load_in_4bit=load_8bit,
             torch_dtype=torch.float16,
             device_map=device_map,
             trust_remote_code=True,
@@ -135,6 +136,7 @@ def train(
     else:
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
+            cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
             load_in_8bit=False,
             torch_dtype=torch.float16,
             device_map={"": int(os.environ.get("LOCAL_RANK") or 0)},
@@ -143,7 +145,7 @@ def train(
 
     if model.config.model_type == "llama":
         # Due to the name of transformers' LlamaTokenizer, we have to do this
-        tokenizer = LlamaTokenizer.from_pretrained(base_model)
+        tokenizer = LlamaTokenizer.from_pretrained(base_model,cache_dir='/home/comp/18482201/llm_research/zjlei/llama')
     else:
         tokenizer = AutoTokenizer.from_pretrained(base_model, trust_remote_code=True)
 
@@ -308,8 +310,8 @@ def train(
         )
     ).__get__(model, type(model))
 
-    if torch.__version__ >= "2" and sys.platform != "win32":
-        model = torch.compile(model)
+    # if torch.__version__ >= "2" and sys.platform != "win32":
+    #     model = torch.compile(model)
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
