@@ -10,7 +10,7 @@ import fire
 import torch
 
 sys.path.append(os.path.join(os.getcwd(), "peft/src/"))
-from peft import PeftModel
+from peft_llm import PeftModel
 from tqdm import tqdm
 from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer, AutoModelForCausalLM, AutoTokenizer
 
@@ -212,10 +212,18 @@ def load_model(args) -> tuple:
     else:
         tokenizer = AutoTokenizer.from_pretrained(base_model)
     if device == "cuda":
+        # if load_8bit:
+        #     model = LlamaForCausalLM.from_pretrained(
+        #     base_model,
+        #     cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
+            
+        #     torch_dtype=torch.float16,
+        #     device_map="auto",
+        #     trust_remote_code=True,
+        # ) # fix zwq
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
             cache_dir='/home/comp/18482201/llm_research/zjlei/llama',
-            load_in_4bit=load_8bit,
             torch_dtype=torch.float16,
             device_map="auto",
             trust_remote_code=True,

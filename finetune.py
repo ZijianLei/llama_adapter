@@ -223,6 +223,7 @@ def train(
             task_type="CAUSAL_LM",
         )
     model = get_peft_model(model, config)
+    # model.add_adapeter(config)
     if adapter_name == "prefix-tuning":
         model.to('cuda')
 
@@ -315,7 +316,7 @@ def train(
 
     trainer.train(resume_from_checkpoint=resume_from_checkpoint)
 
-    model.save_pretrained(output_dir)
+    model.save_pretrained(output_dir, safe_serialization=False)
 
     print(
         "\n If there's a warning about missing keys above, please disregard :)"
